@@ -95,6 +95,10 @@ function resolveTopicLearningPack(
 ): TopicLearningPackEntity {
   const fallback: TopicLearningPackEntity = {
     topicId: topic.id,
+    officialBaseline: topic.resourceIds.articles.slice(0, 1),
+    deepAnalysis: [],
+    cnGuides: [],
+    practiceReferences: topic.resourceIds.diagrams.slice(0, 1),
     primaryReading: topic.resourceIds.articles.slice(0, 1),
     supportingReading: [],
     videoResource: topic.resourceIds.videos.slice(0, 1),
@@ -152,6 +156,18 @@ export async function getTopicDetail(topicId: string): Promise<TopicDetailView |
   const primaryReading = getApprovedWhitelistedResources(
     pickResources(learningPack.primaryReading, schema)
   );
+  const officialBaseline = getApprovedWhitelistedResources(
+    pickResources(learningPack.officialBaseline ?? learningPack.primaryReading, schema)
+  );
+  const deepAnalysis = getApprovedWhitelistedResources(
+    pickResources(learningPack.deepAnalysis ?? learningPack.supportingReading, schema)
+  );
+  const cnGuides = getApprovedWhitelistedResources(
+    pickResources(learningPack.cnGuides ?? [], schema)
+  );
+  const practiceReferences = getApprovedWhitelistedResources(
+    pickResources(learningPack.practiceReferences ?? learningPack.demoResource, schema)
+  );
   const supportingReading = getApprovedWhitelistedResources(
     pickResources(learningPack.supportingReading, schema)
   );
@@ -175,6 +191,10 @@ export async function getTopicDetail(topicId: string): Promise<TopicDetailView |
     oneLineDefinition: topic.oneLineDefinition,
     shortExplanation: topic.shortExplanation,
     deepExplanation: topic.deepExplanation,
+    officialBaseline,
+    deepAnalysis,
+    cnGuides,
+    practiceReferences,
     primaryReading,
     supportingReading,
     videoResource,

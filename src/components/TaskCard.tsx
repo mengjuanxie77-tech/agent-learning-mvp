@@ -56,6 +56,26 @@ export function TaskCard({ task }: TaskCardProps) {
           ))}
         </ul>
       </div>
+      {task.observationFocus?.length ? (
+        <div>
+          <p className="checklist-label">你需要重点观察</p>
+          <ul className="checklist">
+            {task.observationFocus.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {task.reflectionFocus?.length ? (
+        <div>
+          <p className="checklist-label">完成后复盘</p>
+          <ul className="checklist">
+            {task.reflectionFocus.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
   );
 }

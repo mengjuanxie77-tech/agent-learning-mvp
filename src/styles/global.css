@@ -576,6 +576,54 @@ a {
   background: #f3f8fb;
 }
 
+.resource-tag-soft {
+  background: #f7fbf9;
+  color: #3f695f;
+}
+
+.curation-block {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+  border-left: 3px solid #c9dfd9;
+  padding-left: 10px;
+}
+
+.curation-label {
+  color: #285f7b !important;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.compact-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.resource-detail-panel {
+  margin-top: 12px;
+  border: 1px solid #d7e4eb;
+  border-radius: 8px;
+  background: #f7fbfc;
+  padding: 10px 12px;
+}
+
+.resource-detail-panel summary {
+  cursor: pointer;
+  color: #285f7b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.resource-detail-panel p {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
 .resource-link {
   margin-top: 12px;
   display: inline-flex;

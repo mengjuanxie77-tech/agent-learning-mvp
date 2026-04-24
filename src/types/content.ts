@@ -19,6 +19,16 @@ export type ResourceProviderType =
   | "course";
 export type ResourceContentFormat = "text" | "video" | "audio" | "mixed";
 export type ResourceReviewStatus = "pending" | "approved" | "rejected";
+export type ResourceFullTextPolicy =
+  | "hosted_full_text"
+  | "external_full_text_only"
+  | "excerpt_with_guided_notes";
+export type ResourceSourceRole =
+  | "official_baseline"
+  | "deep_analysis"
+  | "cn_interpretation"
+  | "practice_reference"
+  | "candidate";
 export type TaskStatus = "not_started" | "in_progress" | "completed";
 
 export interface LearningStageEntity {
@@ -84,18 +94,39 @@ export interface LearningResourceEntity {
   creatorId?: string;
   summary: string;
   thumbnail?: string;
+  sourceRole?: ResourceSourceRole;
+  authorProfile?: string;
+  whySelected?: string;
+  readingGuide?: string[];
+  keyConcepts?: string[];
+  takeaways?: string[];
+  expectedOutcome?: string;
+  fullTextPolicy?: ResourceFullTextPolicy;
+  licenseType?: string;
+  licenseNote?: string;
+  fullText?: string;
+  excerpt?: string;
+  translation?: string;
   lastCheckedAt: ISODateString;
   metadata: Record<string, string | number | boolean | null>;
 }
 
 export interface ResourceWhitelistConfig {
   articleDocDomains: string[];
+  restrictedDomains: string[];
   videoDomains: string[];
   blockedVideoPlatforms: string[];
+  approvedAuthors: string[];
+  approvedOrganizations: string[];
+  manuallyApprovedUrls: string[];
 }
 
 export interface TopicLearningPackEntity {
   topicId: string;
+  officialBaseline?: string[];
+  deepAnalysis?: string[];
+  cnGuides?: string[];
+  practiceReferences?: string[];
   primaryReading: string[];
   supportingReading: string[];
   videoResource: string[];
@@ -113,6 +144,8 @@ export interface PracticeTaskEntity {
   context: string;
   codexPrompt: string;
   expectedOutput: string;
+  observationFocus?: string[];
+  reflectionFocus?: string[];
   estimatedMinutes: number;
   steps: string[];
   checklist: string[];
@@ -260,6 +293,10 @@ export interface TopicDetailView {
   oneLineDefinition: string;
   shortExplanation: string;
   deepExplanation: string[];
+  officialBaseline: LearningResourceEntity[];
+  deepAnalysis: LearningResourceEntity[];
+  cnGuides: LearningResourceEntity[];
+  practiceReferences: LearningResourceEntity[];
   primaryReading: LearningResourceEntity[];
   supportingReading: LearningResourceEntity[];
   videoResource: LearningResourceEntity[];

@@ -88,6 +88,14 @@ export function KnowledgeUpdatesPage() {
                 </span>
               ))}
             </div>
+            <p className="academy-card-label">受限来源</p>
+            <div className="resource-tags">
+              {whitelist.restrictedDomains.map((domain) => (
+                <span key={domain} className="resource-tag">
+                  {domain}
+                </span>
+              ))}
+            </div>
             <p className="academy-card-label">当前禁用平台</p>
             <div className="resource-tags">
               {whitelist.blockedVideoPlatforms.map((domain) => (
@@ -97,11 +105,32 @@ export function KnowledgeUpdatesPage() {
               ))}
             </div>
           </div>
+          <div className="whitelist-panel">
+            <p className="academy-card-label">作者白名单</p>
+            <div className="resource-tags">
+              {whitelist.approvedAuthors.map((author) => (
+                <span key={author} className="resource-tag">
+                  {author}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="whitelist-panel">
+            <p className="academy-card-label">机构白名单</p>
+            <div className="resource-tags">
+              {whitelist.approvedOrganizations.map((organization) => (
+                <span key={organization} className="resource-tag">
+                  {organization}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="whitelist-steps">
           <p className="academy-card-label">后续新增来源怎么做</p>
           <ol className="academy-list academy-list-ordered">
             <li>在 `src/data/resources/whitelist.ts` 增加白名单域名或平台。</li>
+            <li>公众号等受限来源需要写入 `manuallyApprovedUrls`，不能只按域名放行。</li>
             <li>在 `src/data/resources/resources.ts` 新增资源并默认 `reviewStatus: pending`。</li>
             <li>审核通过后改为 `approved`，再写入 `topic-learning-packs.ts` 绑定到主题。</li>
           </ol>

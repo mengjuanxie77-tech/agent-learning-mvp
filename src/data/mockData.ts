@@ -183,23 +183,129 @@ function buildPlaceholderResources(
 }
 
 function buildPracticeTasks(topics: LearningTopicEntity[]): PracticeTaskEntity[] {
+  const codexPrompts: Record<
+    string,
+    Pick<
+      PracticeTaskEntity,
+      | "goal"
+      | "context"
+      | "codexPrompt"
+      | "expectedOutput"
+      | "steps"
+      | "checklist"
+      | "evaluationRubric"
+      | "observationFocus"
+      | "reflectionFocus"
+    >
+  > = {
+    "topic-what-is-ai-agent": {
+      goal: "用低代码方式搭建一个“任务执行型 Agent”的纸面原型。",
+      context: "你不需要自己写完整代码，重点是让 Codex 帮你生成结构，并理解目标、工具、执行循环和反馈。",
+      codexPrompt:
+        "请帮我设计一个最小 AI Agent 原型，用于完成“整理一篇文章的学习笔记”任务。请输出：1. Agent 的目标；2. 可用工具清单；3. 执行步骤；4. 每一步的输入和输出；5. 失败时如何回退；6. 一份可复制的执行日志模板。请用非开发者也能理解的方式解释。",
+      expectedOutput: "Agent 结构说明 + 执行步骤表 + 日志模板 + 失败恢复说明。",
+      steps: [
+        "把任务目标写成一句话",
+        "让 Codex 列出 Agent 需要的工具和输入输出",
+        "检查每一步是否有明确结果",
+        "补充失败恢复和人工确认节点"
+      ],
+      checklist: ["目标清楚", "工具不超过3个", "每一步有输入输出", "有失败恢复", "有复盘问题"],
+      evaluationRubric: ["是否像任务系统", "是否可执行", "是否有边界", "是否容易解释"],
+      observationFocus: ["Agent 和 chatbot 的差别在哪里", "哪一步需要工具", "哪一步需要人工判断"],
+      reflectionFocus: ["如果去掉工具，它还算 Agent 吗？", "这个 Agent 最容易失败在哪里？"]
+    },
+    "topic-tool-calling-fundamentals": {
+      goal: "用 Codex 设计一个工具调用 schema，并理解模型和代码各自负责什么。",
+      context: "重点不是写 API，而是理解工具调用的契约：声明工具、生成参数、校验、执行、回填。",
+      codexPrompt:
+        "请帮我设计一个 AI Agent 的工具调用方案，场景是“根据用户给出的主题生成学习计划”。请输出：1. 工具名称；2. 工具用途；3. JSON schema 输入参数；4. 返回结果结构；5. 参数校验规则；6. 失败处理；7. 哪些步骤必须由代码执行而不是模型执行。",
+      expectedOutput: "工具卡 + JSON schema + 参数校验规则 + 失败处理说明。",
+      steps: [
+        "定义一个只做一件事的工具",
+        "让 Codex 写出输入参数 schema",
+        "检查哪些字段必填、哪些字段有范围",
+        "补充失败处理和人工确认"
+      ],
+      checklist: ["工具用途单一", "schema 字段清楚", "有校验规则", "有失败处理", "模型和代码分工明确"],
+      evaluationRubric: ["结构清晰", "边界明确", "安全性", "可复用性"],
+      observationFocus: ["模型输出的是意图还是执行结果", "哪些动作有风险", "schema 如何降低误解"],
+      reflectionFocus: ["这个工具如果参数错了会怎样？", "哪些工具不应该默认开放给 Agent？"]
+    },
+    "topic-planning-algorithms": {
+      goal: "让 Codex 帮你把一个复杂任务拆成可观察、可重规划的执行循环。",
+      context: "不要求实现算法，重点理解 ReAct、Plan-and-Execute 和重规划的差别。",
+      codexPrompt:
+        "请帮我把“研究一个新的 AI Agent 技术主题并产出学习报告”设计成一个计划-执行循环。请输出：1. 初始计划；2. 每一步要观察什么；3. 如果资料不足如何重规划；4. 执行日志格式；5. ReAct 版本和 Plan-and-Execute 版本的差异。",
+      expectedOutput: "计划表 + 观察点 + 重规划规则 + 两种执行策略对比。",
+      steps: [
+        "写出任务目标和最终产物",
+        "让 Codex 生成初始计划",
+        "给每一步加观察点和失败条件",
+        "要求 Codex 输出重规划规则"
+      ],
+      checklist: ["有初始计划", "有观察点", "有失败条件", "有重规划规则", "有执行日志"],
+      evaluationRubric: ["任务拆解质量", "可观察性", "恢复能力", "复盘价值"],
+      observationFocus: ["什么时候应该继续执行", "什么时候应该重规划", "日志如何帮助复盘"],
+      reflectionFocus: ["这个任务适合 ReAct 还是 Plan-and-Execute？", "如果第一步失败，系统怎么知道？"]
+    },
+    "topic-agent-runtime-state": {
+      goal: "设计一个最小 Agent 运行时状态表，理解记忆、检查点和执行日志。",
+      context: "你不需要做数据库，先用表格理解哪些状态需要保存、更新、删除。",
+      codexPrompt:
+        "请帮我为一个“个人学习 Agent”设计最小运行时状态模型。请输出：1. 当前任务状态字段；2. 用户偏好字段；3. 工具结果字段；4. 执行日志字段；5. 检查点规则；6. 哪些信息不应该保存；7. 一个失败后恢复执行的示例。",
+      expectedOutput: "状态字段表 + 检查点规则 + 失败恢复示例 + 隐私边界说明。",
+      steps: [
+        "列出 Agent 当前任务需要记住的信息",
+        "区分短期状态和长期记忆",
+        "定义检查点和执行日志",
+        "标注不应该保存的敏感信息"
+      ],
+      checklist: ["短期状态清楚", "长期记忆克制", "有检查点", "有删除/修正边界", "有恢复示例"],
+      evaluationRubric: ["结构化程度", "隐私意识", "可恢复性", "可解释性"],
+      observationFocus: ["哪些信息只是当前任务需要", "哪些信息可以跨会话", "日志和记忆有什么不同"],
+      reflectionFocus: ["如果记错了怎么办？", "哪些状态保存后会带来风险？"]
+    }
+  };
+
   return topics.map((topic, index) => ({
     id: `task-${topic.id}`,
     topicId: topic.id,
     title: `今日实操：${topic.title}`,
-    goal: "在 30~45 分钟内完成该主题的最小可运行实现。",
-    context: "面向学习闭环，优先保证“可执行、可验证、可复盘”。",
-    codexPrompt: `请围绕「${topic.title}」实现一个最小可运行 Agent 示例，包含输入、执行步骤、结果输出和复盘日志。`,
-    expectedOutput: "可运行脚本或页面 + 执行日志 + 简短复盘结论。",
+    goal: codexPrompts[topic.id]?.goal ?? "在 30~45 分钟内完成该主题的最小可运行理解练习。",
+    context:
+      codexPrompts[topic.id]?.context ??
+      "面向学习闭环，优先保证“可执行、可验证、可复盘”。",
+    codexPrompt:
+      codexPrompts[topic.id]?.codexPrompt ??
+      `请围绕「${topic.title}」实现一个最小可运行 Agent 示例，包含输入、执行步骤、结果输出和复盘日志。`,
+    expectedOutput:
+      codexPrompts[topic.id]?.expectedOutput ??
+      "可运行脚本或页面 + 执行日志 + 简短复盘结论。",
     estimatedMinutes: Math.max(30, Math.min(topic.estimatedMinutes, 45)),
-    steps: [
-      "定义任务目标和成功标准",
-      "实现最小执行流程并记录日志",
-      "加入一个失败分支并完成恢复",
-      "输出结果并进行复盘"
-    ],
-    checklist: ["可运行", "有日志", "有失败恢复", "有复盘结论"],
-    evaluationRubric: ["完成度", "稳定性", "可解释性", "可复用性"],
+    steps:
+      codexPrompts[topic.id]?.steps ?? [
+        "定义任务目标和成功标准",
+        "实现最小执行流程并记录日志",
+        "加入一个失败分支并完成恢复",
+        "输出结果并进行复盘"
+      ],
+    checklist:
+      codexPrompts[topic.id]?.checklist ?? [
+        "可运行",
+        "有日志",
+        "有失败恢复",
+        "有复盘结论"
+      ],
+    evaluationRubric:
+      codexPrompts[topic.id]?.evaluationRubric ?? [
+        "完成度",
+        "稳定性",
+        "可解释性",
+        "可复用性"
+      ],
+    observationFocus: codexPrompts[topic.id]?.observationFocus,
+    reflectionFocus: codexPrompts[topic.id]?.reflectionFocus,
     status: index === 0 ? "in_progress" : "not_started"
   }));
 }
@@ -284,8 +390,8 @@ const learningRecords: LearningRecordEntity[] = [
     selfRating: 4,
     nextAction: "完成 Prompt 模板和结构化输出练习。",
     savedResourceIds: [
-      "real-what-agent-primary-openai-guide",
-      "real-what-agent-video-bilibili-intro"
+      "agent-baseline-anthropic-effective-agents",
+      "agent-deep-chip-huyen-agents"
     ]
   }
 ];

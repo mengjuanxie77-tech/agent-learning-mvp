@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ArrowLeft,
-  AudioLines,
-  BookMarked,
-  Boxes,
   Bookmark,
   BookmarkCheck,
-  FileText,
-  PlayCircle
+  BookOpen,
+  Compass,
+  Languages,
+  FileText
 } from "lucide-react";
 import { getTopicDetail } from "../services/contentService";
 import type { TopicDetailView, TopicStatus } from "../types/content";
@@ -180,38 +179,31 @@ export function TopicDetailPage() {
       </section>
 
       <ResourceSection
-        title="核心阅读"
+        title="先建立标准理解"
         icon={<FileText size={16} />}
-        resources={topic.primaryReading}
-        emptyHint="核心阅读正在审核中，暂未发布。"
+        resources={topic.officialBaseline}
+        emptyHint="官方底座正在审核中，暂未发布。"
       />
 
       <ResourceSection
-        title="辅助阅读"
-        icon={<BookMarked size={16} />}
-        resources={topic.supportingReading}
-        emptyHint="辅助阅读尚未配置。"
+        title="再读深度分析"
+        icon={<BookOpen size={16} />}
+        resources={topic.deepAnalysis}
+        emptyHint="深度分析正在策展中。"
       />
 
       <ResourceSection
-        title="视频资源"
-        icon={<PlayCircle size={16} />}
-        resources={topic.videoResource}
-        emptyHint="视频资源正在审核中，暂未发布。"
+        title="中文带读"
+        icon={<Languages size={16} />}
+        resources={topic.cnGuides}
+        emptyHint="中文带读正在整理中。"
       />
 
       <ResourceSection
-        title="Demo / Example / Repo"
-        icon={<Boxes size={16} />}
-        resources={topic.demoResource}
-        emptyHint="Demo 资源尚未配置。"
-      />
-
-      <ResourceSection
-        title="音频资源（预留）"
-        icon={<AudioLines size={16} />}
-        resources={topic.audioResource}
-        emptyHint="当前主题暂无音频资源。"
+        title="用 Codex 做一遍"
+        icon={<Compass size={16} />}
+        resources={topic.practiceReferences}
+        emptyHint="实操参考正在配置中。"
       />
 
       <TaskCard task={topic.practiceTask} />
