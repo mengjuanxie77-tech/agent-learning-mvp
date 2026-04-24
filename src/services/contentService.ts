@@ -8,6 +8,7 @@ import type {
   HomeOverviewView,
   LearningContentSchema,
   LearningResourceEntity,
+  ResourceWhitelistConfig,
   LearningStageEntity,
   LearningStageView,
   LearningTopicEntity,
@@ -206,4 +207,9 @@ export async function getKnowledgeUpdates(): Promise<KnowledgeUpdatesView> {
 export async function getKnowledgeMap(): Promise<KnowledgeMapView> {
   const schema = await getSchema();
   return schema.knowledgeMap;
+}
+
+export async function getResourceWhitelistConfig(): Promise<ResourceWhitelistConfig> {
+  const schema = await getSchema();
+  return schema.resourceWhitelist;
 }

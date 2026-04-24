@@ -407,6 +407,27 @@ a {
   list-style: decimal;
 }
 
+.whitelist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.whitelist-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-strong);
+}
+
+.whitelist-steps {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-strong);
+}
+
 .topic-card-head {
   display: flex;
   justify-content: space-between;
@@ -692,7 +713,8 @@ a {
   .topic-grid,
   .resource-grid,
   .academy-grid,
-  .academy-module-grid {
+  .academy-module-grid,
+  .whitelist-grid {
     grid-template-columns: 1fr;
   }
 

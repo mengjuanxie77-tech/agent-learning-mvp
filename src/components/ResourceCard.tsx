@@ -9,11 +9,11 @@ interface ResourceCardProps {
   resource: LearningResourceEntity;
 }
 
-function formatDuration(durationSeconds?: number): string {
-  if (!durationSeconds) {
+function formatDuration(durationMinutes?: number): string {
+  if (!durationMinutes) {
     return "TBD";
   }
-  return `${durationSeconds} min`;
+  return `${durationMinutes} min`;
 }
 
 export function ResourceCard({ resource }: ResourceCardProps) {
@@ -45,7 +45,12 @@ export function ResourceCard({ resource }: ResourceCardProps) {
         <span className="resource-tag">{resource.providerType}</span>
         {resource.isOfficial ? <span className="resource-tag">official</span> : null}
       </div>
-      <a className="resource-link" href={resource.url}>
+      <a
+        className="resource-link"
+        href={resource.url}
+        target="_blank"
+        rel="noreferrer noopener"
+      >
         打开资源
         <ExternalLink size={14} />
       </a>

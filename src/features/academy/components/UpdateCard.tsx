@@ -17,7 +17,12 @@ export function UpdateCard({ item }: UpdateCardProps) {
       </div>
       <h3>{item.title}</h3>
       <p>{item.description}</p>
-      <a className="resource-link" href={item.url}>
+      <a
+        className="resource-link"
+        href={item.url}
+        target="_blank"
+        rel="noreferrer noopener"
+      >
         查看来源
       </a>
     </article>

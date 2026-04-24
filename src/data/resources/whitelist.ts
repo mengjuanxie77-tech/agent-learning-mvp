@@ -14,6 +14,7 @@ export const resourceWhitelistConfig: ResourceWhitelistConfig = {
     "learn.microsoft.com",
     "cloud.google.com",
     "docs.llamaindex.ai",
+    "developers.llamaindex.ai",
     "deeplearning.ai",
     "infoq.com",
     "martinfowler.com"
