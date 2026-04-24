@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { TopicStatus } from "../types/content";
+import type { LearningStageView, TopicStatus } from "../types/content";
 import {
+  selectHasLearningHistory,
   selectContinueLearningTopicIds,
   selectIsResourceFavorited,
   selectIsTaskFavorited,
-  selectIsTopicFavorited
+  selectIsTopicFavorited,
+  selectStageLearningMetrics
 } from "../store/learningStateSelectors";
 import { useLearningStateStore } from "../store/learningStateStore";
 
@@ -15,6 +17,7 @@ export function useLearningActions() {
       toggleTopicFavorite: state.toggleTopicFavorite,
       toggleResourceFavorite: state.toggleResourceFavorite,
       toggleTaskFavorite: state.toggleTaskFavorite,
+      enterTopic: state.enterTopic,
       touchTopic: state.touchTopic,
       setTopicStatus: state.setTopicStatus,
       setTopicProgress: state.setTopicProgress
@@ -61,6 +64,10 @@ export function useContinueLearningTopicIds(): string[] {
   );
 }
 
+export function useHasLearningHistory(): boolean {
+  return useLearningStateStore((state) => selectHasLearningHistory(state));
+}
+
 export function useFavoriteSummary() {
   return useLearningStateStore(
     useShallow((state) => ({
@@ -68,5 +75,14 @@ export function useFavoriteSummary() {
       favoriteResourceCount: state.favoriteResourceIds.length,
       favoriteTaskCount: state.favoriteTaskIds.length
     }))
+  );
+}
+
+export function useStageLearningMetrics(stage: LearningStageView) {
+  const topicProgressById = useLearningStateStore((state) => state.topicProgressById);
+
+  return useMemo(
+    () => selectStageLearningMetrics(stage, { topicProgressById }),
+    [stage, topicProgressById]
   );
 }

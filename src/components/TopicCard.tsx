@@ -9,6 +9,7 @@ import {
 
 interface TopicCardProps {
   topic: TopicPreview;
+  actionLabel?: string;
 }
 
 const difficultyLabel = {
@@ -23,7 +24,7 @@ const statusLabel: Record<TopicStatus, string> = {
   completed: "已完成"
 };
 
-export function TopicCard({ topic }: TopicCardProps) {
+export function TopicCard({ topic, actionLabel = "进入主题学习" }: TopicCardProps) {
   const isFavorited = useIsTopicFavorited(topic.id);
   const { toggleTopicFavorite } = useLearningActions();
   const learningSnapshot = useTopicLearningSnapshot(topic.id, topic.status);
@@ -44,7 +45,7 @@ export function TopicCard({ topic }: TopicCardProps) {
       <div className="topic-meta">
         <span className="meta-chip">
           <Clock3 size={14} />
-          {topic.durationMinutes} min
+          {topic.duration}
         </span>
         <span className="meta-chip">
           <Signal size={14} />
@@ -52,7 +53,7 @@ export function TopicCard({ topic }: TopicCardProps) {
         </span>
       </div>
       <h3 className="topic-title">{topic.title}</h3>
-      <p className="topic-summary">{topic.summary}</p>
+      <p className="topic-summary">{topic.description}</p>
       <div className="topic-progress-wrap">
         <div className="topic-progress-head">
           <span>学习进度</span>
@@ -66,7 +67,7 @@ export function TopicCard({ topic }: TopicCardProps) {
         </div>
       </div>
       <Link to={`/topic/${topic.id}`} className="topic-link">
-        进入主题学习
+        {actionLabel}
       </Link>
     </article>
   );

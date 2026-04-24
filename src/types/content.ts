@@ -27,10 +27,11 @@ export interface LearningTopicEntity {
   stageId: string;
   title: string;
   subtitle: string;
-  summary: string;
+  description: string;
   oneLineDefinition: string;
   shortExplanation: string;
   deepExplanation: string[];
+  duration: string;
   estimatedMinutes: number;
   difficulty: DifficultyLevel;
   status: TopicStatus;
@@ -123,6 +124,54 @@ export interface HomeConfig {
   spotlightStageId: string;
 }
 
+export interface PracticeLabItem {
+  id: string;
+  title: string;
+  description: string;
+  skillsLearned: string[];
+}
+
+export interface PlaygroundDemoItem {
+  id: string;
+  title: string;
+  description: string;
+  workflowSteps: string[];
+}
+
+export interface KnowledgeUpdateItem {
+  id: string;
+  title: string;
+  description: string;
+  sourceName: string;
+  url: string;
+  publishedAt: ISODateString;
+}
+
+export interface KnowledgeUpdatesView {
+  latestResearch: KnowledgeUpdateItem[];
+  frameworkUpdates: KnowledgeUpdateItem[];
+  industryApplications: KnowledgeUpdateItem[];
+}
+
+export interface KnowledgeMapLayer {
+  id: string;
+  name: string;
+  description: string;
+  keyConcepts: string[];
+  order: number;
+}
+
+export interface KnowledgeMapView {
+  layers: KnowledgeMapLayer[];
+}
+
+export interface AcademyModuleLink {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+}
+
 export interface LearningContentSchema {
   stages: Record<string, LearningStageEntity>;
   topics: Record<string, LearningTopicEntity>;
@@ -130,6 +179,11 @@ export interface LearningContentSchema {
   practiceTasks: Record<string, PracticeTaskEntity>;
   reflectionTemplates: Record<string, ReflectionTemplateEntity>;
   learningRecords: Record<string, LearningRecordEntity>;
+  practiceLabs: Record<string, PracticeLabItem>;
+  playgroundDemos: Record<string, PlaygroundDemoItem>;
+  knowledgeUpdates: KnowledgeUpdatesView;
+  knowledgeMap: KnowledgeMapView;
+  academyModules: AcademyModuleLink[];
   homeConfig: HomeConfig;
 }
 
@@ -137,8 +191,8 @@ export interface TopicPreview {
   id: string;
   stageId: string;
   title: string;
-  summary: string;
-  durationMinutes: number;
+  description: string;
+  duration: string;
   difficulty: DifficultyLevel;
   status: TopicStatus;
   tags: string[];
@@ -157,6 +211,7 @@ export interface HomeOverviewView {
   todayTopicId: string;
   heroMessage: string;
   spotlightStageId: string;
+  modules: AcademyModuleLink[];
   stages: LearningStageView[];
 }
 

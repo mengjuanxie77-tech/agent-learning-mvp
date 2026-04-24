@@ -6,7 +6,8 @@ import type { HomeOverviewView, StageStatus, TopicPreview } from "../types/conte
 import { TopicCard } from "../components/TopicCard";
 import {
   useContinueLearningTopicIds,
-  useFavoriteSummary
+  useFavoriteSummary,
+  useHasLearningHistory
 } from "../hooks/useLearningState";
 
 const stageStatusLabel: Record<StageStatus, string> = {
@@ -19,6 +20,7 @@ export function HomePage() {
   const [data, setData] = useState<HomeOverviewView | null>(null);
   const continueLearningIds = useContinueLearningTopicIds();
   const favoriteSummary = useFavoriteSummary();
+  const hasLearningHistory = useHasLearningHistory();
 
   useEffect(() => {
     getHomeOverview().then(setData);
@@ -40,6 +42,8 @@ export function HomePage() {
     .map((topicId) => topicById[topicId])
     .filter((topic): topic is TopicPreview => Boolean(topic))
     .slice(0, 3);
+  const recommendedStartTopic =
+    data.stages[0]?.topics[0] ?? todayTopic ?? currentStage.topics[0];
 
   return (
     <div className="page-stack">
@@ -48,7 +52,7 @@ export function HomePage() {
           <CalendarDays size={14} />
           今日学习焦点
         </p>
-        <h1>智能体从0到1学习网站</h1>
+        <h1>AI Agent Academy</h1>
         <p>{data.heroMessage}</p>
         <div className="hero-actions">
           <Link to="/path" className="cta-btn">
@@ -62,6 +66,68 @@ export function HomePage() {
           ) : null}
         </div>
       </section>
+
+      <section className="content-band">
+        <div className="section-head">
+          <h2>Academy Modules</h2>
+          <span>学习路径 + 实操 + 演示 + 更新 + 图谱</span>
+        </div>
+        <div className="academy-grid academy-module-grid">
+          {data.modules.map((module) => (
+            <Link key={module.id} to={module.path} className="academy-card academy-link-card">
+              <h3>{module.title}</h3>
+              <p>{module.description}</p>
+              <span className="topic-link">进入模块</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {hasLearningHistory ? (
+        <section className="content-band">
+          <div className="section-head">
+            <h2>继续学习</h2>
+            <span>
+              已收藏 {favoriteSummary.favoriteTopicCount} 个主题 /{" "}
+              {favoriteSummary.favoriteResourceCount} 个资源 /{" "}
+              {favoriteSummary.favoriteTaskCount} 个任务
+            </span>
+          </div>
+          {continueLearningTopics.length > 0 ? (
+            <div className="topic-grid">
+              {continueLearningTopics.map((topic) => (
+                <TopicCard key={topic.id} topic={topic} actionLabel="继续学习" />
+              ))}
+            </div>
+          ) : (
+            <div className="recommended-panel">
+              <p className="empty-hint">你有学习记录，建议先回到路径页选择最近阶段继续。</p>
+              <Link to="/path" className="cta-btn">
+                去继续学习
+              </Link>
+            </div>
+          )}
+        </section>
+      ) : (
+        <section className="content-band">
+          <div className="section-head">
+            <h2>推荐起点</h2>
+            <span>建议从阶段 1 开始，先建立统一概念框架</span>
+          </div>
+          {recommendedStartTopic ? (
+            <div className="single-topic-panel">
+              <TopicCard topic={recommendedStartTopic} actionLabel="从这里开始" />
+            </div>
+          ) : (
+            <div className="recommended-panel">
+              <p className="empty-hint">当前暂无推荐主题，请先进入学习路径页选择起点。</p>
+              <Link to="/path" className="cta-btn">
+                去学习路径页
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="content-band">
         <div className="section-head">
@@ -83,34 +149,12 @@ export function HomePage() {
 
       <section className="content-band">
         <div className="section-head">
-          <h2>继续学习</h2>
-          <span>
-            已收藏 {favoriteSummary.favoriteTopicCount} 个主题 /{" "}
-            {favoriteSummary.favoriteResourceCount} 个资源 /{" "}
-            {favoriteSummary.favoriteTaskCount} 个任务
-          </span>
-        </div>
-        {continueLearningTopics.length > 0 ? (
-          <div className="topic-grid">
-            {continueLearningTopics.map((topic) => (
-              <TopicCard key={topic.id} topic={topic} />
-            ))}
-          </div>
-        ) : (
-          <p className="empty-hint">
-            你还没有学习记录。进入任一主题后，系统会自动记录并出现在这里。
-          </p>
-        )}
-      </section>
-
-      <section className="content-band">
-        <div className="section-head">
           <h2>今日推荐主题</h2>
           <span>{currentStage.title}</span>
         </div>
         {todayTopic ? (
           <div className="single-topic-panel">
-            <TopicCard topic={todayTopic} />
+            <TopicCard topic={todayTopic} actionLabel="进入今日主题" />
           </div>
         ) : (
           <p className="empty-hint">暂未配置今日主题。</p>

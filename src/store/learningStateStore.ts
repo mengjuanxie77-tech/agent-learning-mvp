@@ -56,6 +56,7 @@ export interface LearningStateStore {
   toggleTopicFavorite: (topicId: string) => void;
   toggleResourceFavorite: (resourceId: string) => void;
   toggleTaskFavorite: (taskId: string) => void;
+  enterTopic: (topicId: string) => void;
   touchTopic: (topicId: string, fallbackStatus?: TopicStatus) => void;
   setTopicStatus: (topicId: string, status: TopicStatus) => void;
   setTopicProgress: (topicId: string, progressPercent: number) => void;
@@ -110,6 +111,38 @@ export const useLearningStateStore = create<LearningStateStore>()(
         set((state) => ({
           favoriteTaskIds: toggleInList(state.favoriteTaskIds, taskId)
         })),
+      enterTopic: (topicId) => {
+        const snapshot = get();
+        const existing = snapshot.topicProgressById[topicId];
+        const now = nowIso();
+        const shouldBootstrapLearning =
+          !existing ||
+          (existing.status === "not_started" && !existing.startedAt);
+        const next: TopicLearningProgressState = shouldBootstrapLearning
+          ? {
+              topicId,
+              status: "in_progress",
+              progressPercent: Math.max(10, existing?.progressPercent ?? 0),
+              startedAt: existing?.startedAt ?? now,
+              completedAt: undefined,
+              lastVisitedAt: now
+            }
+          : {
+              ...existing,
+              lastVisitedAt: now
+            };
+
+        set((state) => ({
+          topicProgressById: {
+            ...state.topicProgressById,
+            [topicId]: next
+          },
+          recentlyVisitedTopicIds: withRecentTopic(
+            state.recentlyVisitedTopicIds,
+            topicId
+          )
+        }));
+      },
       touchTopic: (topicId, fallbackStatus = "not_started") => {
         const snapshot = get();
         const existing = upsertTopicProgress(

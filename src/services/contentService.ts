@@ -1,5 +1,9 @@
 import { mockLearningSchema } from "../data/mockData";
 import type {
+  KnowledgeMapView,
+  KnowledgeUpdatesView,
+  PlaygroundDemoItem,
+  PracticeLabItem,
   HomeOverviewView,
   LearningContentSchema,
   LearningResourceEntity,
@@ -35,8 +39,8 @@ function toTopicPreview(topic: LearningTopicEntity): TopicPreview {
     id: topic.id,
     stageId: topic.stageId,
     title: topic.title,
-    summary: topic.summary,
-    durationMinutes: topic.estimatedMinutes,
+    description: topic.description,
+    duration: topic.duration,
     difficulty: topic.difficulty,
     status: topic.status,
     tags: topic.keywordTags
@@ -84,6 +88,7 @@ export async function getHomeOverview(): Promise<HomeOverviewView> {
     todayTopicId: schema.homeConfig.todayTopicId,
     heroMessage: schema.homeConfig.heroMessage,
     spotlightStageId: schema.homeConfig.spotlightStageId,
+    modules: schema.academyModules,
     stages: stageViews
   };
 }
@@ -133,4 +138,24 @@ export async function getTopicDetail(topicId: string): Promise<TopicDetailView |
     reflectionTemplate,
     learningRecord
   };
+}
+
+export async function getPracticeLabs(): Promise<PracticeLabItem[]> {
+  const schema = await getSchema();
+  return Object.values(schema.practiceLabs);
+}
+
+export async function getPlaygroundDemos(): Promise<PlaygroundDemoItem[]> {
+  const schema = await getSchema();
+  return Object.values(schema.playgroundDemos);
+}
+
+export async function getKnowledgeUpdates(): Promise<KnowledgeUpdatesView> {
+  const schema = await getSchema();
+  return schema.knowledgeUpdates;
+}
+
+export async function getKnowledgeMap(): Promise<KnowledgeMapView> {
+  const schema = await getSchema();
+  return schema.knowledgeMap;
 }

@@ -1,9 +1,17 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, AudioLines, BookMarked, PlayCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  AudioLines,
+  BookMarked,
+  Bookmark,
+  BookmarkCheck,
+  PlayCircle
+} from "lucide-react";
 import { getTopicDetail } from "../services/contentService";
 import type { TopicDetailView, TopicStatus } from "../types/content";
 import {
+  useIsTopicFavorited,
   useLearningActions,
   useTopicLearningSnapshot
 } from "../hooks/useLearningState";
@@ -26,9 +34,11 @@ function formatDateTime(value?: string): string {
 export function TopicDetailPage() {
   const { topicId = "" } = useParams();
   const [topic, setTopic] = useState<TopicDetailView | null | undefined>(undefined);
-  const { touchTopic, setTopicStatus, setTopicProgress } = useLearningActions();
+  const { enterTopic, setTopicStatus, setTopicProgress, toggleTopicFavorite } =
+    useLearningActions();
   const activeTopicId = topic?.id ?? topicId;
   const learningSnapshot = useTopicLearningSnapshot(activeTopicId, "not_started");
+  const isTopicFavorited = useIsTopicFavorited(activeTopicId);
 
   useEffect(() => {
     getTopicDetail(topicId).then(setTopic);
@@ -36,9 +46,9 @@ export function TopicDetailPage() {
 
   useEffect(() => {
     if (topic) {
-      touchTopic(topic.id, "not_started");
+      enterTopic(topic.id);
     }
-  }, [topic, touchTopic]);
+  }, [topic, enterTopic]);
 
   if (topic === undefined) {
     return <p className="loading">页面加载中...</p>;
@@ -64,7 +74,17 @@ export function TopicDetailPage() {
           返回学习路径
         </Link>
         <p className="hero-kicker">Topic Detail</p>
-        <h1>{topic.title}</h1>
+        <div className="topic-hero-head">
+          <h1>{topic.title}</h1>
+          <button
+            className="icon-btn"
+            type="button"
+            onClick={() => toggleTopicFavorite(topic.id)}
+            aria-label={isTopicFavorited ? "取消收藏主题" : "收藏主题"}
+          >
+            {isTopicFavorited ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+          </button>
+        </div>
         <p>{topic.subtitle}</p>
       </section>
 
