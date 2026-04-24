@@ -1,22 +1,25 @@
+import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import type { TopicStatus } from "../types/content";
 import {
   selectContinueLearningTopicIds,
   selectIsResourceFavorited,
   selectIsTaskFavorited,
-  selectIsTopicFavorited,
-  selectTopicLearningSnapshot
+  selectIsTopicFavorited
 } from "../store/learningStateSelectors";
 import { useLearningStateStore } from "../store/learningStateStore";
 
 export function useLearningActions() {
-  return useLearningStateStore((state) => ({
-    toggleTopicFavorite: state.toggleTopicFavorite,
-    toggleResourceFavorite: state.toggleResourceFavorite,
-    toggleTaskFavorite: state.toggleTaskFavorite,
-    touchTopic: state.touchTopic,
-    setTopicStatus: state.setTopicStatus,
-    setTopicProgress: state.setTopicProgress
-  }));
+  return useLearningStateStore(
+    useShallow((state) => ({
+      toggleTopicFavorite: state.toggleTopicFavorite,
+      toggleResourceFavorite: state.toggleResourceFavorite,
+      toggleTaskFavorite: state.toggleTaskFavorite,
+      touchTopic: state.touchTopic,
+      setTopicStatus: state.setTopicStatus,
+      setTopicProgress: state.setTopicProgress
+    }))
+  );
 }
 
 export function useIsTopicFavorited(topicId: string): boolean {
@@ -37,19 +40,33 @@ export function useTopicLearningSnapshot(
   topicId: string,
   fallbackStatus: TopicStatus
 ) {
-  return useLearningStateStore((state) =>
-    selectTopicLearningSnapshot(state, topicId, fallbackStatus)
+  const existing = useLearningStateStore(
+    (state) => state.topicProgressById[topicId]
+  );
+
+  return useMemo(
+    () =>
+      existing ?? {
+        topicId,
+        status: fallbackStatus,
+        progressPercent: fallbackStatus === "completed" ? 100 : 0
+      },
+    [existing, topicId, fallbackStatus]
   );
 }
 
 export function useContinueLearningTopicIds(): string[] {
-  return useLearningStateStore((state) => selectContinueLearningTopicIds(state));
+  return useLearningStateStore(
+    useShallow((state) => selectContinueLearningTopicIds(state))
+  );
 }
 
 export function useFavoriteSummary() {
-  return useLearningStateStore((state) => ({
-    favoriteTopicCount: state.favoriteTopicIds.length,
-    favoriteResourceCount: state.favoriteResourceIds.length,
-    favoriteTaskCount: state.favoriteTaskIds.length
-  }));
+  return useLearningStateStore(
+    useShallow((state) => ({
+      favoriteTopicCount: state.favoriteTopicIds.length,
+      favoriteResourceCount: state.favoriteResourceIds.length,
+      favoriteTaskCount: state.favoriteTaskIds.length
+    }))
+  );
 }
