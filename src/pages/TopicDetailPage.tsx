@@ -1,11 +1,14 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import {
   ArrowLeft,
   AudioLines,
   BookMarked,
+  Boxes,
   Bookmark,
   BookmarkCheck,
+  FileText,
   PlayCircle
 } from "lucide-react";
 import { getTopicDetail } from "../services/contentService";
@@ -29,6 +32,38 @@ function formatDateTime(value?: string): string {
     return "暂无";
   }
   return new Date(value).toLocaleString("zh-CN");
+}
+
+function ResourceSection({
+  title,
+  icon,
+  resources,
+  emptyHint
+}: {
+  title: string;
+  icon: ReactNode;
+  resources: TopicDetailView["primaryReading"];
+  emptyHint: string;
+}) {
+  return (
+    <section className="content-band">
+      <div className="section-head">
+        <h2>
+          {icon}
+          {title}
+        </h2>
+      </div>
+      {resources.length > 0 ? (
+        <div className="resource-grid">
+          {resources.map((resource) => (
+            <ResourceCard key={resource.id} resource={resource} />
+          ))}
+        </div>
+      ) : (
+        <p className="empty-hint">{emptyHint}</p>
+      )}
+    </section>
+  );
 }
 
 export function TopicDetailPage() {
@@ -108,14 +143,6 @@ export function TopicDetailPage() {
       </section>
 
       <section className="content-band">
-        <h2>图示占位区域</h2>
-        <div className="diagram-placeholder">
-          <p>Diagram Placeholder</p>
-          <p>{topic.diagrams[0]?.diagram?.content ?? "图示内容待补充。"}</p>
-        </div>
-      </section>
-
-      <section className="content-band">
         <h2>学习进度</h2>
         <div className="status-segment">
           {statusOptions.map((option) => (
@@ -152,55 +179,48 @@ export function TopicDetailPage() {
         </div>
       </section>
 
-      <section className="content-band">
-        <div className="section-head">
-          <h2>
-            <PlayCircle size={16} />
-            视频资源
-          </h2>
-        </div>
-        <div className="resource-grid">
-          {topic.videos.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </div>
-      </section>
+      <ResourceSection
+        title="核心阅读"
+        icon={<FileText size={16} />}
+        resources={topic.primaryReading}
+        emptyHint="核心阅读正在审核中，暂未发布。"
+      />
 
-      <section className="content-band">
-        <div className="section-head">
-          <h2>
-            <AudioLines size={16} />
-            音频资源
-          </h2>
-        </div>
-        <div className="resource-grid">
-          {topic.audios.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </div>
-      </section>
+      <ResourceSection
+        title="辅助阅读"
+        icon={<BookMarked size={16} />}
+        resources={topic.supportingReading}
+        emptyHint="辅助阅读尚未配置。"
+      />
 
-      <section className="content-band">
-        <div className="section-head">
-          <h2>
-            <BookMarked size={16} />
-            推荐阅读
-          </h2>
-        </div>
-        <div className="resource-grid">
-          {topic.readings.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </div>
-      </section>
+      <ResourceSection
+        title="视频资源"
+        icon={<PlayCircle size={16} />}
+        resources={topic.videoResource}
+        emptyHint="视频资源正在审核中，暂未发布。"
+      />
+
+      <ResourceSection
+        title="Demo / Example / Repo"
+        icon={<Boxes size={16} />}
+        resources={topic.demoResource}
+        emptyHint="Demo 资源尚未配置。"
+      />
+
+      <ResourceSection
+        title="音频资源（预留）"
+        icon={<AudioLines size={16} />}
+        resources={topic.audioResource}
+        emptyHint="当前主题暂无音频资源。"
+      />
 
       <TaskCard task={topic.practiceTask} />
 
       <section className="content-band">
         <h2>学习复盘问题</h2>
         <ol className="review-list">
-          {topic.reflectionTemplate.questions.map((question) => (
-            <li key={question.id}>{question.prompt}</li>
+          {topic.reflectionQuestions.map((question) => (
+            <li key={question}>{question}</li>
           ))}
         </ol>
       </section>

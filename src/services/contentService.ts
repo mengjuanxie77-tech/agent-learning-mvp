@@ -1,4 +1,5 @@
 import { mockLearningSchema } from "../data/mockData";
+import { isResourceWhitelistedByDomain } from "../data/resources/whitelist";
 import type {
   KnowledgeMapView,
   KnowledgeUpdatesView,
@@ -10,6 +11,7 @@ import type {
   LearningStageEntity,
   LearningStageView,
   LearningTopicEntity,
+  TopicLearningPackEntity,
   TopicDetailView,
   TopicPreview
 } from "../types/content";
@@ -75,6 +77,35 @@ function pickResources(
     .filter((resource): resource is LearningResourceEntity => Boolean(resource));
 }
 
+function getApprovedWhitelistedResources(
+  resources: LearningResourceEntity[]
+): LearningResourceEntity[] {
+  return resources.filter(
+    (resource) =>
+      resource.reviewStatus === "approved" &&
+      resource.isWhitelisted &&
+      isResourceWhitelistedByDomain(resource)
+  );
+}
+
+function resolveTopicLearningPack(
+  topic: LearningTopicEntity,
+  schema: LearningContentSchema
+): TopicLearningPackEntity {
+  const fallback: TopicLearningPackEntity = {
+    topicId: topic.id,
+    primaryReading: topic.resourceIds.articles.slice(0, 1),
+    supportingReading: [],
+    videoResource: topic.resourceIds.videos.slice(0, 1),
+    audioResource: [],
+    demoResource: topic.resourceIds.diagrams.slice(0, 1),
+    practiceTaskId: topic.practiceTaskId,
+    reflectionQuestions: []
+  };
+
+  return schema.topicLearningPacks[topic.id] ?? fallback;
+}
+
 async function getSchema() {
   return repository.getSchema();
 }
@@ -108,17 +139,30 @@ export async function getTopicDetail(topicId: string): Promise<TopicDetailView |
     return null;
   }
 
-  const practiceTask = schema.practiceTasks[topic.practiceTaskId];
+  const learningPack = resolveTopicLearningPack(topic, schema);
+
+  const practiceTask = schema.practiceTasks[learningPack.practiceTaskId];
   const reflectionTemplate = schema.reflectionTemplates[topic.reflectionTemplateId];
 
   if (!practiceTask || !reflectionTemplate) {
     return null;
   }
 
-  const videos = pickResources(topic.resourceIds.videos, schema);
-  const audios = pickResources(topic.resourceIds.audios, schema);
-  const readings = pickResources(topic.resourceIds.articles, schema);
-  const diagrams = pickResources(topic.resourceIds.diagrams, schema);
+  const primaryReading = getApprovedWhitelistedResources(
+    pickResources(learningPack.primaryReading, schema)
+  );
+  const supportingReading = getApprovedWhitelistedResources(
+    pickResources(learningPack.supportingReading, schema)
+  );
+  const videoResource = getApprovedWhitelistedResources(
+    pickResources(learningPack.videoResource, schema)
+  );
+  const audioResource = getApprovedWhitelistedResources(
+    pickResources(learningPack.audioResource, schema)
+  );
+  const demoResource = getApprovedWhitelistedResources(
+    pickResources(learningPack.demoResource, schema)
+  );
 
   const learningRecord =
     Object.values(schema.learningRecords).find((record) => record.topicId === topic.id) ?? null;
@@ -130,12 +174,16 @@ export async function getTopicDetail(topicId: string): Promise<TopicDetailView |
     oneLineDefinition: topic.oneLineDefinition,
     shortExplanation: topic.shortExplanation,
     deepExplanation: topic.deepExplanation,
-    diagrams,
-    videos,
-    audios,
-    readings,
+    primaryReading,
+    supportingReading,
+    videoResource,
+    audioResource,
+    demoResource,
     practiceTask,
-    reflectionTemplate,
+    reflectionQuestions:
+      learningPack.reflectionQuestions.length > 0
+        ? learningPack.reflectionQuestions
+        : reflectionTemplate.questions.map((item) => item.prompt),
     learningRecord
   };
 }

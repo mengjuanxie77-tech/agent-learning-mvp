@@ -6,6 +6,7 @@ import type {
   LearningTopicEntity,
   PracticeTaskEntity,
   ReflectionTemplateEntity,
+  TopicLearningPackEntity,
   TopicStatus
 } from "../types/content";
 import { stageDefinitions, topicBlueprints } from "./academy/learningPathData";
@@ -14,9 +15,18 @@ import { playgroundDemoItems } from "./academy/playgroundData";
 import { knowledgeUpdates } from "./academy/updatesData";
 import { knowledgeMap } from "./academy/knowledgeMapData";
 import { academyModules } from "./academy/modulesData";
+import { curatedResources } from "./resources/resources";
+import { topicLearningPacks as curatedTopicLearningPacks } from "./resources/topic-learning-packs";
+import { resourceWhitelistConfig } from "./resources/whitelist";
 
 function indexById<T extends { id: string }>(items: T[]): Record<string, T> {
   return Object.fromEntries(items.map((item) => [item.id, item]));
+}
+
+function indexTopicLearningPacks(
+  items: TopicLearningPackEntity[]
+): Record<string, TopicLearningPackEntity> {
+  return Object.fromEntries(items.map((item) => [item.topicId, item]));
 }
 
 function buildStages(): LearningStageEntity[] {
@@ -61,10 +71,10 @@ function buildTopics(): LearningTopicEntity[] {
       keywordTags: topicBlueprint.tags,
       searchableText: `${topicBlueprint.title} ${topicBlueprint.tags.join(" ")}`,
       resourceIds: {
-        articles: [`res-article-${topicBlueprint.id}`],
-        videos: [`res-video-${topicBlueprint.id}`],
-        audios: [`res-audio-${topicBlueprint.id}`],
-        diagrams: [`res-diagram-${topicBlueprint.id}`]
+        articles: [`placeholder-article-${topicBlueprint.id}`],
+        videos: [`placeholder-video-${topicBlueprint.id}`],
+        audios: [`placeholder-audio-${topicBlueprint.id}`],
+        diagrams: [`placeholder-demo-${topicBlueprint.id}`]
       },
       practiceTaskId: `task-${topicBlueprint.id}`,
       reflectionTemplateId: `reflect-${topicBlueprint.id}`
@@ -72,68 +82,101 @@ function buildTopics(): LearningTopicEntity[] {
   });
 }
 
-function buildResources(topics: LearningTopicEntity[]): LearningResourceEntity[] {
+function buildPlaceholderResources(
+  topics: LearningTopicEntity[]
+): LearningResourceEntity[] {
+  const checkedAt = "2026-04-24T12:00:00Z";
   return topics.flatMap((topic) => [
     {
-      id: `res-article-${topic.id}`,
-      type: "article",
-      topicId: topic.id,
-      title: `${topic.title}: Core Reading`,
-      description: "帮助你快速理解该主题的核心概念与实现思路。",
-      sourceName: "Academy Reading",
-      sourceType: "internal",
+      id: `placeholder-article-${topic.id}`,
+      title: `${topic.title}：主阅读（待接入）`,
+      description: "该主题真实主阅读正在接入中。",
       url: "#",
-      language: "zh-CN",
-      tags: [...topic.keywordTags, "article"],
-      searchableText: `${topic.title} reading`,
-      durationSeconds: 720,
-      diagram: null
+      domain: "internal.local",
+      sourceType: "article",
+      providerType: "course",
+      language: "zh",
+      contentFormat: "text",
+      topicTags: topic.keywordTags,
+      difficulty: topic.difficulty,
+      durationMinutes: 15,
+      isOfficial: false,
+      isWhitelisted: false,
+      qualityScore: 50,
+      reviewStatus: "pending",
+      summary: "占位资源，等待替换为白名单真实内容。",
+      lastCheckedAt: checkedAt,
+      metadata: {
+        placeholder: true
+      }
     },
     {
-      id: `res-video-${topic.id}`,
-      type: "video",
-      topicId: topic.id,
-      title: `${topic.title}: Walkthrough Video`,
-      description: "用案例讲解该主题在智能体系统里的应用方式。",
-      sourceName: "Academy Video",
-      sourceType: "internal",
+      id: `placeholder-video-${topic.id}`,
+      title: `${topic.title}：视频（待接入）`,
+      description: "该主题中文视频正在接入中。",
       url: "#",
-      language: "zh-CN",
-      tags: [...topic.keywordTags, "video"],
-      searchableText: `${topic.title} video`,
-      durationSeconds: 900,
-      diagram: null
+      domain: "internal.local",
+      sourceType: "video",
+      providerType: "course",
+      language: "zh",
+      contentFormat: "video",
+      topicTags: topic.keywordTags,
+      difficulty: topic.difficulty,
+      durationMinutes: 20,
+      isOfficial: false,
+      isWhitelisted: false,
+      qualityScore: 50,
+      reviewStatus: "pending",
+      summary: "占位视频资源，等待替换为 bilibili 审核通过内容。",
+      lastCheckedAt: checkedAt,
+      metadata: {
+        placeholder: true
+      }
     },
     {
-      id: `res-audio-${topic.id}`,
-      type: "audio",
-      topicId: topic.id,
-      title: `${topic.title}: Audio Notes`,
-      description: "适合通勤场景的主题要点音频回顾。",
-      sourceName: "Academy Audio",
-      sourceType: "internal",
+      id: `placeholder-audio-${topic.id}`,
+      title: `${topic.title}：音频（预留）`,
+      description: "音频资源槽位预留，可为空。",
       url: "#",
-      language: "zh-CN",
-      tags: [...topic.keywordTags, "audio"],
-      searchableText: `${topic.title} audio`,
-      durationSeconds: 780,
-      diagram: null
+      domain: "internal.local",
+      sourceType: "audio",
+      providerType: "course",
+      language: "zh",
+      contentFormat: "audio",
+      topicTags: topic.keywordTags,
+      difficulty: topic.difficulty,
+      durationMinutes: 15,
+      isOfficial: false,
+      isWhitelisted: false,
+      qualityScore: 50,
+      reviewStatus: "pending",
+      summary: "占位音频资源。",
+      lastCheckedAt: checkedAt,
+      metadata: {
+        placeholder: true
+      }
     },
     {
-      id: `res-diagram-${topic.id}`,
-      type: "diagram",
-      topicId: topic.id,
-      title: `${topic.title}: Diagram`,
-      description: "结构化图示，帮助快速建立主题认知。",
-      sourceName: "Academy Diagram",
-      sourceType: "internal",
+      id: `placeholder-demo-${topic.id}`,
+      title: `${topic.title}：Demo / Example（待接入）`,
+      description: "Demo 资源槽位预留。",
       url: "#",
-      language: "zh-CN",
-      tags: [...topic.keywordTags, "diagram"],
-      searchableText: `${topic.title} diagram`,
-      diagram: {
-        format: "placeholder",
-        content: `${topic.title} -> Input -> Reasoning -> Tool/Knowledge -> Output`
+      domain: "internal.local",
+      sourceType: "tutorial",
+      providerType: "course",
+      language: "zh",
+      contentFormat: "mixed",
+      topicTags: topic.keywordTags,
+      difficulty: topic.difficulty,
+      durationMinutes: 20,
+      isOfficial: false,
+      isWhitelisted: false,
+      qualityScore: 50,
+      reviewStatus: "pending",
+      summary: "占位 demo 资源。",
+      lastCheckedAt: checkedAt,
+      metadata: {
+        placeholder: true
       }
     }
   ]);
@@ -185,11 +228,41 @@ function buildReflectionTemplates(
   }));
 }
 
+function buildDefaultLearningPacks(
+  topics: LearningTopicEntity[],
+  reflectionTemplates: ReflectionTemplateEntity[]
+): TopicLearningPackEntity[] {
+  return topics.map((topic) => {
+    const reflectionTemplate = reflectionTemplates.find(
+      (item) => item.topicId === topic.id
+    );
+
+    return {
+      topicId: topic.id,
+      primaryReading: topic.resourceIds.articles.slice(0, 1),
+      supportingReading: [],
+      videoResource: topic.resourceIds.videos.slice(0, 1),
+      audioResource: [],
+      demoResource: topic.resourceIds.diagrams.slice(0, 1),
+      practiceTaskId: topic.practiceTaskId,
+      reflectionQuestions:
+        reflectionTemplate?.questions.map((item) => item.prompt) ?? []
+    };
+  });
+}
+
 const topics = buildTopics();
 const stages = buildStages();
-const resources = buildResources(topics);
+const placeholderResources = buildPlaceholderResources(topics);
 const practiceTasks = buildPracticeTasks(topics);
 const reflectionTemplates = buildReflectionTemplates(topics);
+const defaultLearningPacks = buildDefaultLearningPacks(topics, reflectionTemplates);
+
+const resources = indexById([...placeholderResources, ...curatedResources]);
+const topicLearningPacks = indexTopicLearningPacks([
+  ...defaultLearningPacks,
+  ...curatedTopicLearningPacks
+]);
 
 const learningRecords: LearningRecordEntity[] = [
   {
@@ -211,8 +284,8 @@ const learningRecords: LearningRecordEntity[] = [
     selfRating: 4,
     nextAction: "完成 Prompt 模板和结构化输出练习。",
     savedResourceIds: [
-      "res-article-topic-what-is-ai-agent",
-      "res-video-topic-what-is-ai-agent"
+      "real-what-agent-primary-openai-guide",
+      "real-what-agent-video-bilibili-intro"
     ]
   }
 ];
@@ -220,7 +293,8 @@ const learningRecords: LearningRecordEntity[] = [
 export const mockLearningSchema: LearningContentSchema = {
   stages: indexById(stages),
   topics: indexById(topics),
-  resources: indexById(resources),
+  resources,
+  topicLearningPacks,
   practiceTasks: indexById(practiceTasks),
   reflectionTemplates: indexById(reflectionTemplates),
   learningRecords: indexById(learningRecords),
@@ -229,6 +303,7 @@ export const mockLearningSchema: LearningContentSchema = {
   knowledgeUpdates,
   knowledgeMap,
   academyModules,
+  resourceWhitelist: resourceWhitelistConfig,
   homeConfig: {
     heroMessage: "用一条完整学习路径，把 AI Agent 从概念学到可落地执行。",
     todayTopicId: "topic-what-is-ai-agent",

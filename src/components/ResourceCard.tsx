@@ -13,8 +13,7 @@ function formatDuration(durationSeconds?: number): string {
   if (!durationSeconds) {
     return "TBD";
   }
-  const minutes = Math.max(1, Math.round(durationSeconds / 60));
-  return `${minutes} min`;
+  return `${durationSeconds} min`;
 }
 
 export function ResourceCard({ resource }: ResourceCardProps) {
@@ -24,9 +23,9 @@ export function ResourceCard({ resource }: ResourceCardProps) {
   return (
     <article className="resource-card">
       <div className="resource-head">
-        <p>{resource.sourceName}</p>
+        <p>{resource.domain}</p>
         <div className="resource-head-actions">
-          <span>{formatDuration(resource.durationSeconds)}</span>
+          <span>{formatDuration(resource.durationMinutes)}</span>
           <button
             className="icon-btn"
             type="button"
@@ -39,6 +38,13 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       </div>
       <h3>{resource.title}</h3>
       <p>{resource.description}</p>
+      <div className="resource-tags">
+        <span className="resource-tag">{resource.sourceType}</span>
+        <span className="resource-tag">{resource.language.toUpperCase()}</span>
+        <span className="resource-tag">{resource.difficulty}</span>
+        <span className="resource-tag">{resource.providerType}</span>
+        {resource.isOfficial ? <span className="resource-tag">official</span> : null}
+      </div>
       <a className="resource-link" href={resource.url}>
         打开资源
         <ExternalLink size={14} />

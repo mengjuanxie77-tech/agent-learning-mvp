@@ -3,8 +3,22 @@ export type ISODateString = string;
 export type StageStatus = "completed" | "in_progress" | "planned";
 export type TopicStatus = "not_started" | "in_progress" | "completed";
 export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
-export type ResourceType = "article" | "video" | "audio" | "diagram";
-export type ResourceSourceType = "official" | "community" | "internal";
+export type ResourceSourceType =
+  | "article"
+  | "doc"
+  | "repo"
+  | "video"
+  | "audio"
+  | "guide"
+  | "tutorial";
+export type ResourceProviderType =
+  | "official"
+  | "github"
+  | "blog"
+  | "bilibili"
+  | "course";
+export type ResourceContentFormat = "text" | "video" | "audio" | "mixed";
+export type ResourceReviewStatus = "pending" | "approved" | "rejected";
 export type TaskStatus = "not_started" | "in_progress" | "completed";
 
 export interface LearningStageEntity {
@@ -49,24 +63,46 @@ export interface LearningTopicEntity {
 
 export interface LearningResourceEntity {
   id: string;
-  type: ResourceType;
-  topicId: string;
   title: string;
   description: string;
-  sourceName: string;
-  sourceType: ResourceSourceType;
   url: string;
-  language: string;
-  tags: string[];
-  searchableText: string;
-  publishedAt?: ISODateString;
-  author?: string;
-  durationSeconds?: number;
-  thumbnailUrl?: string;
-  diagram: null | {
-    format: "image" | "mermaid" | "placeholder";
-    content: string;
-  };
+  domain: string;
+  sourceType: ResourceSourceType;
+  providerType: ResourceProviderType;
+  language: "zh" | "en";
+  contentFormat: ResourceContentFormat;
+  topicTags: string[];
+  difficulty: DifficultyLevel;
+  durationMinutes?: number;
+  isOfficial: boolean;
+  isWhitelisted: boolean;
+  qualityScore: number;
+  reviewStatus: ResourceReviewStatus;
+  publishDate?: ISODateString;
+  authorName?: string;
+  creatorName?: string;
+  creatorId?: string;
+  summary: string;
+  thumbnail?: string;
+  lastCheckedAt: ISODateString;
+  metadata: Record<string, string | number | boolean | null>;
+}
+
+export interface ResourceWhitelistConfig {
+  articleDocDomains: string[];
+  videoDomains: string[];
+  blockedVideoPlatforms: string[];
+}
+
+export interface TopicLearningPackEntity {
+  topicId: string;
+  primaryReading: string[];
+  supportingReading: string[];
+  videoResource: string[];
+  audioResource: string[];
+  demoResource: string[];
+  practiceTaskId: string;
+  reflectionQuestions: string[];
 }
 
 export interface PracticeTaskEntity {
@@ -176,6 +212,7 @@ export interface LearningContentSchema {
   stages: Record<string, LearningStageEntity>;
   topics: Record<string, LearningTopicEntity>;
   resources: Record<string, LearningResourceEntity>;
+  topicLearningPacks: Record<string, TopicLearningPackEntity>;
   practiceTasks: Record<string, PracticeTaskEntity>;
   reflectionTemplates: Record<string, ReflectionTemplateEntity>;
   learningRecords: Record<string, LearningRecordEntity>;
@@ -184,6 +221,7 @@ export interface LearningContentSchema {
   knowledgeUpdates: KnowledgeUpdatesView;
   knowledgeMap: KnowledgeMapView;
   academyModules: AcademyModuleLink[];
+  resourceWhitelist: ResourceWhitelistConfig;
   homeConfig: HomeConfig;
 }
 
@@ -222,11 +260,12 @@ export interface TopicDetailView {
   oneLineDefinition: string;
   shortExplanation: string;
   deepExplanation: string[];
-  diagrams: LearningResourceEntity[];
-  videos: LearningResourceEntity[];
-  audios: LearningResourceEntity[];
-  readings: LearningResourceEntity[];
+  primaryReading: LearningResourceEntity[];
+  supportingReading: LearningResourceEntity[];
+  videoResource: LearningResourceEntity[];
+  audioResource: LearningResourceEntity[];
+  demoResource: LearningResourceEntity[];
   practiceTask: PracticeTaskEntity;
-  reflectionTemplate: ReflectionTemplateEntity;
+  reflectionQuestions: string[];
   learningRecord: LearningRecordEntity | null;
 }
